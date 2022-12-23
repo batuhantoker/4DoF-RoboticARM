@@ -1,0 +1,181 @@
+% Author: Elif İzgi
+% Problem: Kane formulation for 4 DoF Manipulator
+%-------------------------------------------------------------------- 
+% Default settings 
+AutoEpsilon 1.0E-14 % Rounds off to nearest integer 
+AutoZ OFF % Turn ON for large problems 
+Digits 7  % Number of digits displayed for numbers 
+%-------------------------------------------------------------------- 
+% Newtonian, bodies, frames, particles, points
+
+Newtonian N
+Bodies A, B, C, D,E,F
+Variables  q1'', q2'', q3'' ,q4'', x'',y'',z''
+Variables x, y, z
+Specified Fx, Fy, Fz  				% External force
+
+Specified TA, TB, TC, TD 		% Actuation torques on bodies A , B and C
+
+Constants Lax,Laz,Lb,Lc,Lt
+Points     O,P,R,S,G
+%-------------------------------------------------------------------- 
+% Motion variables for static/dynamic analysis 
+MotionVariables' uA', uB', uC', uD'    % Motion variables; derivatives 
+%-------------------------------------------------------------------- 
+
+Mass A=mA, B=mB, C=mC, D=mD, E = mE, F=mF
+Inertia A, IA11, IA22, IA33 
+
+Inertia B, IB11, IB22, IB33 
+
+Inertia C, IC11, IC22, IC33 
+
+Inertia D, ID11, ID22, ID33 
+
+%-------------------------------------------------------------------- 
+Simprot(N, A, 3, q1)
+Simprot(A, B, 1, q2)
+Simprot(B, C, 3, q3)
+Simprot(C, D, 1, q4)
+%-------------------------------------------------------------------- 
+% Kinematical differential equations 
+q1' = uA 
+q2' = uB
+q3' = uC
+q4' = uD
+
+%-------------------------------------------------------------------- 
+% Angular velocities 
+angvel(N,A)
+ 
+angvel(N,B) 
+
+angvel(N,C)
+
+angvel(N,D)
+
+%-------------------------------------------------------------------- 
+P_O_P> = Laz*A3>
+P_P_R> = Lax*A1>
+P_R_S> = Lb*B1>
+P_S_G> = Lt*D3>
+P_O_Ao> = 0.5*P_O_P>
+P_O_Bo> = P_O_P> + 0.5*P_P_R>
+P_O_Co> = P_O_P> + P_P_R> + 0.5*P_R_S>
+P_O_Do> = P_O_P> + P_P_R> + P_R_S> + 0.5*P_S_T>
+P_O_G>= P_O_P> + P_P_R>+ P_R_S>  + P_S_G>
+
+%-------------------------------------------------------------------- 
+% Velocities 
+V_O_N> = 0>
+V_P_N> = dt(P_O_P>,N)
+V_R_N> = dt(P_O_R>,N)
+
+V_S_N> = dt(P_O_S>,N)
+
+V_T_N> = dt(P_O_T>,N)
+
+V_G_N> = dt(P_O_G>,N)
+
+V_Ao_N> = dt(P_O_Ao>,N)
+
+V_Bo_N> = dt(P_O_Bo>,N)
+V_Co_N> = dt(P_O_Co>,N)
+
+V_Do_N> = dt(P_O_Do>,N)
+
+V_Eo_N> = dt(P_O_Eo>,N)
+
+V_Fo_N> = dt(P_O_Fo>,N)
+%-------------------------------------------------------------------- 
+% Angular accelerations 
+ALF_A_N> = Dt( W_A_N>, N ) 
+
+ALF_B_N> = Dt( W_B_N>, N ) 
+
+ALF_C_N> = Dt( W_C_N>, N ) 
+
+ALF_D_N> = Dt( W_D_N>, N ) 
+
+ALF_E_N> = Dt( W_E_N>, N ) 
+
+ALF_F_N> = Dt( W_F_N>, N ) 
+%-------------------------------------------------------------------- 
+% Accelerations 
+A_O_N> = 0> 
+A_P_N> = dt(V_P_N>,N)
+A_R_N> = dt(V_R_N>,N)
+
+A_S_N> = dt(V_S_N>,N)
+
+
+
+A_G_N> = dt(V_G_N>,N)
+
+A_Ao_N> = dt(V_Ao_N>,N) 
+
+A_Bo_N> = dt(V_Bo_N>,N)
+
+A_Co_N> = dt(V_Co_N>,N)
+
+A_Do_N> = dt(V_Do_N>,N)
+
+
+%-------------------------------------------------------------------- 
+% Forces 
+Force_G> = -Fx*N1> - Fy*N2>  - Fz*N3> 
+%-------------------------------------------------------------------- 
+% Torques 
+Torque_A> = TA*N3> 
+
+Torque_B> = TB*N3> 
+
+Torque_C> = TC*N3> 
+
+Torque_D> = TD*N3> 
+%-------------------------------------------------------------------- 
+loopeqn>=x*n1>+y*n2>+z*n3>-P_O_G>
+zero1=dot(loopeqn>,n1>)
+zero2=dot(loopeqn>,n2>)
+zero3=dot(loopeqn>,n3>)
+zero4=N_D[1,1]
+zero5=N_D[2,2]
+zero6=N_D[3,3]
+
+%-------------------------------------------------------------------- 
+Zeroconfig1=[d(zero1,q1), d(zero1,q2),d(zero1,q3), d(zero1,q4)]
+Zeroconfig2=[d(zero2,q1), d(zero2,q2),d(zero2,q3) ,d(zero2,q4)]
+Zeroconfig3=[d(zero3,q1),d(zero3,q2), d(zero3,q3),d(zero3,q4)]
+Zeroconfig4=[d(zero4,q1),d(zero4,q2), d(zero4,q3),d(zero4,q4)]
+Zeroconfig5=[d(zero5,q1),d(zero5,q2), d(zero5,q3),d(zero5,q4)]
+Zeroconfig6=[d(zero6,q1),d(zero6,q2), d(zero6,q3),d(zero6,q4)]
+Zeroconfig=[Zeroconfig1;Zeroconfig2;Zeroconfig3;Zeroconfig4;Zeroconfig5;Zeroconfig6]
+%-------------------------------------------------------------------- 
+% Equations of motion 
+Zero = Fr() + FrStar() 
+Kane() % Simplify and/or solve 
+%--------------------------------------------------------------------
+% Expressions for quantities to be output from CODE 
+x' = Dot(V_G_N>, n1>) 
+
+y' = Dot(V_G_N>, n2>) 
+
+z' = Dot(V_G_N>, n3>) 
+%--------------------------------------------------------------------
+% Units system for CODE input/output conversions 
+UnitSystem kg, meter, sec 
+%-------------------------------------------------------------------- 
+% Quantities to be output from CODE 
+Output t sec 
+Output x mm, y mm 
+Output x' mm/s, y' mm/s 
+Output qA rad, qB rad, qC rad, qD rad 
+Output uA rad/s, uB rad/s, uC rad/s, uD rad/s 
+Output uA' rad/s^2, uB' rad/s^2, uC' rad/s^2, uD' rad/s^2 
+%-------------------------------------------------------------------- 
+code ode() 4DOF_kane.m 
+%------------------------------------------------------------------- 
+% Record Autolev responses
+Save 4DOF_kane.all
+
+

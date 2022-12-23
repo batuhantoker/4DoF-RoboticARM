@@ -1,0 +1,361 @@
+   (1) % Author: Elif Izgi
+   (2) % Problem: Kane formulation for 4 DoF Manipulator
+   (3) %-------------------------------------------------------------------- 
+   (4) % Default settings 
+   (5) AutoEpsilon 1.0E-14 % Rounds off to nearest integer 
+   (6) AutoZ OFF % Turn ON for large problems 
+   (7) Digits 7  % Number of digits displayed for numbers 
+   (8) %-------------------------------------------------------------------- 
+   (9) % Newtonian, bodies, frames, particles, points
+   (10) Newtonian N
+   (11) Bodies A, B, C, D,E,F
+   (12) Variables  q1'', q2'', q3'' ,q4'', x'',y'',z''
+   (13) Variables x, y, z
+   (14) Specified Fx, Fy, Fz  % External force
+   (15) Specified TA, TB, TC, TD % Actuation torques on bodies A , B and C
+   (16) Constants Lax,Laz,Lb,Lc,Lt
+   (17) Points     O,P,R,S,G
+   (18) %-------------------------------------------------------------------- 
+   (19) % Motion variables for static/dynamic analysis 
+   (20) MotionVariables' uA', uB', uC', uD'    % Motion variables; derivatives 
+   (21) %-------------------------------------------------------------------- 
+   (22) Mass A=mA, B=mB, C=mC, D=mD, E = mE, F=mF
+   (23) Inertia A, IA11, IA22, IA33 
+-> (24) I_A_AO>> = IA11*A1>*A1> + IA22*A2>*A2> + IA33*A3>*A3>
+
+   (25) Inertia B, IB11, IB22, IB33 
+-> (26) I_B_BO>> = IB11*B1>*B1> + IB22*B2>*B2> + IB33*B3>*B3>
+
+   (27) Inertia C, IC11, IC22, IC33 
+-> (28) I_C_CO>> = IC11*C1>*C1> + IC22*C2>*C2> + IC33*C3>*C3>
+
+   (29) Inertia D, ID11, ID22, ID33 
+-> (30) I_D_DO>> = ID11*D1>*D1> + ID22*D2>*D2> + ID33*D3>*D3>
+
+   (31) %-------------------------------------------------------------------- 
+   (32) Simprot(N, A, 3, q1)
+-> (33) N_A = [COS(q1), -SIN(q1), 0; SIN(q1), COS(q1), 0; 0, 0, 1]
+
+   (34) Simprot(A, B, 1, q2)
+-> (35) A_B = [1, 0, 0; 0, COS(q2), -SIN(q2); 0, SIN(q2), COS(q2)]
+
+   (36) Simprot(B, C, 3, q3)
+-> (37) B_C = [COS(q3), -SIN(q3), 0; SIN(q3), COS(q3), 0; 0, 0, 1]
+
+   (38) Simprot(C, D, 1, q4)
+-> (39) C_D = [1, 0, 0; 0, COS(q4), -SIN(q4); 0, SIN(q4), COS(q4)]
+
+   (40) %-------------------------------------------------------------------- 
+   (41) % Kinematical differential equations 
+   (42) q1' = uA 
+-> (43) q1' = uA
+
+   (44) q2' = uB
+-> (45) q2' = uB
+
+   (46) q3' = uC
+-> (47) q3' = uC
+
+   (48) q4' = uD
+-> (49) q4' = uD
+
+   (50) %-------------------------------------------------------------------- 
+   (51) % Angular velocities 
+   (52) angvel(N,A)
+-> (53) W_A_N> = uA*A3>
+
+   (54) angvel(N,B) 
+-> (55) W_B_N> = uB*B1> + SIN(q2)*uA*B2> + COS(q2)*uA*B3>
+
+   (56) angvel(N,C)
+-> (57) W_C_N> = (COS(q3)*uB+SIN(q2)*SIN(q3)*uA)*C1> + (SIN(q2)*COS(q3)*uA-SIN(
+        q3)*uB)*C2> + (uC+COS(q2)*uA)*C3>
+
+   (58) angvel(N,D)
+-> (59) W_D_N> = (uD+COS(q3)*uB+SIN(q2)*SIN(q3)*uA)*D1> + (SIN(q4)*uC+(SIN(q4)*
+        COS(q2)+SIN(q2)*COS(q3)*COS(q4))*uA-SIN(q3)*COS(q4)*uB)*D2> + (COS(q4)*
+        uC+SIN(q3)*SIN(q4)*uB+(COS(q2)*COS(q4)-SIN(q2)*SIN(q4)*COS(q3))*uA)*D3>
+
+   (60) %-------------------------------------------------------------------- 
+   (61) P_O_P> = Laz*A3>
+-> (62) P_O_P> = Laz*A3>
+
+   (63) P_P_R> = Lax*A1>
+-> (64) P_P_R> = Lax*A1>
+
+   (65) P_R_S> = Lb*B1>
+-> (66) P_R_S> = Lb*B1>
+
+   (67) P_S_G> = Lt*D3>
+-> (68) P_S_G> = Lt*D3>
+
+   (69) P_O_Ao> = 0.5*P_O_P>
+-> (70) P_O_Ao> = 0.5*Laz*A3>
+
+   (71) P_O_Bo> = P_O_P> + 0.5*P_P_R>
+-> (72) P_O_Bo> = 0.5*Lax*A1> + Laz*A3>
+
+   (73) P_O_Co> = P_O_P> + P_P_R> + 0.5*P_R_S>
+-> (74) P_O_Co> = Lax*A1> + Laz*A3> + 0.5*Lb*B1>
+
+   (75) P_O_G>= P_O_P> + P_P_R>+ P_R_S>  + P_S_G>
+-> (76) P_O_G> = Lax*A1> + Laz*A3> + Lb*B1> + Lt*D3>
+
+   (77) %-------------------------------------------------------------------- 
+   (78) % Velocities 
+   (79) V_O_N> = 0>
+-> (80) V_O_N> = 0>
+
+   (81) V_P_N> = dt(P_O_P>,N)
+-> (82) V_P_N> = 0>
+
+   (83) V_R_N> = dt(P_O_R>,N)
+-> (84) V_R_N> = Lax*uA*A2>
+
+   (85) V_S_N> = dt(P_O_S>,N)
+-> (86) V_S_N> = Lax*uA*A2> + Lb*COS(q2)*uA*B2> - Lb*SIN(q2)*uA*B3>
+
+   (87) V_G_N> = dt(P_O_G>,N)
+-> (88) V_G_N> = Lax*uA*A2> + Lb*COS(q2)*uA*B2> - Lb*SIN(q2)*uA*B3> - Lt*(SIN(
+        q3)*COS(q4)*uB-SIN(q4)*uC-(SIN(q4)*COS(q2)+SIN(q2)*COS(q3)*COS(q4))*uA)
+        *D1> - Lt*(uD+COS(q3)*uB+SIN(q2)*SIN(q3)*uA)*D2>
+
+   (89) V_Ao_N> = dt(P_O_Ao>,N)
+-> (90) V_Ao_N> = 0>
+
+   (91) V_Bo_N> = dt(P_O_Bo>,N)
+-> (92) V_Bo_N> = 0.5*Lax*uA*A2>
+
+   (93) V_Co_N> = dt(P_O_Co>,N)
+-> (94) V_Co_N> = Lax*uA*A2> + 0.5*Lb*COS(q2)*uA*B2> - 0.5*Lb*SIN(q2)*uA*B3>
+
+   (95) %-------------------------------------------------------------------- 
+   (96) % Angular accelerations 
+   (97) ALF_A_N> = Dt( W_A_N>, N ) 
+-> (98) ALF_A_N> = uA'*A3>
+
+   (99) ALF_B_N> = Dt( W_B_N>, N ) 
+-> (100) ALF_B_N> = uB'*B1> + (COS(q2)*uA*uB+SIN(q2)*uA')*B2> + (COS(q2)*uA'-
+         SIN(q2)*uA*uB)*B3>
+
+   (101) ALF_C_N> = Dt( W_C_N>, N ) 
+-> (102) ALF_C_N> = (SIN(q2)*COS(q3)*uA*uC+SIN(q3)*COS(q2)*uA*uB+COS(q3)*uB'+
+         SIN(q2)*SIN(q3)*uA'-SIN(q3)*uB*uC)*C1> + (COS(q2)*COS(q3)*uA*uB+SIN(
+         q2)*COS(q3)*uA'-COS(q3)*uB*uC-SIN(q2)*SIN(q3)*uA*uC-SIN(q3)*uB')*C2>
+          + (uC'+COS(q2)*uA'-SIN(q2)*uA*uB)*C3>
+
+   (103) ALF_D_N> = Dt( W_D_N>, N ) 
+-> (104) ALF_D_N> = (SIN(q2)*COS(q3)*uA*uC+SIN(q3)*COS(q2)*uA*uB+uD'+COS(q3)*
+         uB'+SIN(q2)*SIN(q3)*uA'-SIN(q3)*uB*uC)*D1> + (COS(q4)*uC*uD+SIN(q3)*
+         SIN(q4)*uB*uD+SIN(q4)*uC'+(SIN(q4)*COS(q2)+SIN(q2)*COS(q3)*COS(q4))*
+         uA'-COS(q3)*COS(q4)*uB*uC-uA*(SIN(q2)*SIN(q4)*uB+SIN(q2)*SIN(q3)*COS(
+         q4)*uC+SIN(q2)*SIN(q4)*COS(q3)*uD-COS(q2)*COS(q4)*uD-COS(q2)*COS(q3)*
+         COS(q4)*uB)-SIN(q3)*COS(q4)*uB')*D2> + (SIN(q3)*COS(q4)*uB*uD+SIN(q4)*
+         COS(q3)*uB*uC+uA*(SIN(q2)*SIN(q3)*SIN(q4)*uC-SIN(q2)*COS(q4)*uB-SIN(
+         q4)*COS(q2)*uD-SIN(q2)*COS(q3)*COS(q4)*uD-SIN(q4)*COS(q2)*COS(q3)*uB)+
+         COS(q4)*uC'+SIN(q3)*SIN(q4)*uB'+(COS(q2)*COS(q4)-SIN(q2)*SIN(q4)*COS(
+         q3))*uA'-SIN(q4)*uC*uD)*D3>
+
+   (105) %-------------------------------------------------------------------- 
+   (106) % Accelerations 
+   (107) A_O_N> = 0> 
+-> (108) A_O_N> = 0>
+
+   (109) A_P_N> = dt(V_P_N>,N)
+-> (110) A_P_N> = 0>
+
+   (111) A_R_N> = dt(V_R_N>,N)
+-> (112) A_R_N> = -Lax*uA^2*A1> + Lax*uA'*A2>
+
+   (113) A_S_N> = dt(V_S_N>,N)
+-> (114) A_S_N> = -Lax*uA^2*A1> + Lax*uA'*A2> - Lb*uA^2*B1> + Lb*COS(q2)*uA'*
+         B2> - Lb*SIN(q2)*uA'*B3>
+
+   (115) A_G_N> = dt(V_G_N>,N)
+-> (116) A_G_N> = -Lax*uA^2*A1> + Lax*uA'*A2> - Lb*uA^2*B1> + Lb*COS(q2)*uA'*
+         B2> - Lb*SIN(q2)*uA'*B3> - Lt*(COS(q3)*COS(q4)*uB*uC+uA*(SIN(q2)*SIN(
+         q4)*uB+SIN(q2)*SIN(q3)*COS(q4)*uC+SIN(q2)*SIN(q4)*COS(q3)*uD-COS(q2)*
+         COS(q4)*uD-COS(q2)*COS(q3)*COS(q4)*uB)+SIN(q3)*COS(q4)*uB'-COS(q4)*uC*
+         uD-SIN(q3)*SIN(q4)*uB*uD-(uD+COS(q3)*uB+SIN(q2)*SIN(q3)*uA)*(COS(q4)*
+         uC+SIN(q3)*SIN(q4)*uB+(COS(q2)*COS(q4)-SIN(q2)*SIN(q4)*COS(q3))*uA)-
+         SIN(q4)*uC'-(SIN(q4)*COS(q2)+SIN(q2)*COS(q3)*COS(q4))*uA')*D1> + Lt*(
+         SIN(q3)*uB*uC-SIN(q2)*COS(q3)*uA*uC-SIN(q3)*COS(q2)*uA*uB-(COS(q4)*uC+
+         SIN(q3)*SIN(q4)*uB+(COS(q2)*COS(q4)-SIN(q2)*SIN(q4)*COS(q3))*uA)*(SIN(
+         q3)*COS(q4)*uB-SIN(q4)*uC-(SIN(q4)*COS(q2)+SIN(q2)*COS(q3)*COS(q4))*
+         uA)-uD'-COS(q3)*uB'-SIN(q2)*SIN(q3)*uA')*D2> - Lt*((uD+COS(q3)*uB+SIN(
+         q2)*SIN(q3)*uA)^2+(SIN(q3)*COS(q4)*uB-SIN(q4)*uC-(SIN(q4)*COS(q2)+SIN(
+         q2)*COS(q3)*COS(q4))*uA)^2)*D3>
+
+   (117) A_Ao_N> = dt(V_Ao_N>,N) 
+-> (118) A_Ao_N> = 0>
+
+   (119) A_Bo_N> = dt(V_Bo_N>,N)
+-> (120) A_Bo_N> = -0.5*Lax*uA^2*A1> + 0.5*Lax*uA'*A2>
+
+   (121) A_Co_N> = dt(V_Co_N>,N)
+-> (122) A_Co_N> = -Lax*uA^2*A1> + Lax*uA'*A2> - 0.5*Lb*uA^2*B1> + 0.5*Lb*COS(
+         q2)*uA'*B2> - 0.5*Lb*SIN(q2)*uA'*B3>
+
+   (123) %-------------------------------------------------------------------- 
+   (124) % Forces 
+   (125) Force_G> = -Fx*N1> - Fy*N2>  - Fz*N3> 
+-> (126) Force_G> = -Fx*N1> - Fy*N2> - Fz*N3>
+
+   (127) %-------------------------------------------------------------------- 
+   (128) % Torques 
+   (129) Torque_A> = TA*N3> 
+-> (130) Torque_A> = TA*N3>
+
+   (131) Torque_B> = TB*N3> 
+-> (132) Torque_B> = TB*N3>
+
+   (133) Torque_C> = TC*N3> 
+-> (134) Torque_C> = TC*N3>
+
+   (135) Torque_D> = TD*N3> 
+-> (136) Torque_D> = TD*N3>
+
+   (137) %-------------------------------------------------------------------- 
+   (138) loopeqn>=x*n1>+y*n2>+z*n3>-P_O_G>
+-> (139) loopeqn> = -Lax*A1> - Laz*A3> - Lb*B1> - Lt*D3> + x*N1> + y*N2> + z*
+         N3>
+
+   (140) zero1=dot(loopeqn>,n1>)
+-> (141) zero1 = x - Lax*COS(q1) - Lb*COS(q1) - Lt*(SIN(q3)*SIN(q4)*COS(q1)+SIN
+         (q1)*(SIN(q2)*COS(q4)+SIN(q4)*COS(q2)*COS(q3)))
+
+   (142) zero2=dot(loopeqn>,n2>)
+-> (143) zero2 = y - Lax*SIN(q1) - Lb*SIN(q1) - Lt*(SIN(q1)*SIN(q3)*SIN(q4)-COS
+         (q1)*(SIN(q2)*COS(q4)+SIN(q4)*COS(q2)*COS(q3)))
+
+   (144) zero3=dot(loopeqn>,n3>)
+-> (145) zero3 = z - Laz - Lt*(COS(q2)*COS(q4)-SIN(q2)*SIN(q4)*COS(q3))
+
+   (146) zero4=N_D[1,1]
+-> (147) zero4 = COS(q1)*COS(q3) - SIN(q1)*SIN(q3)*COS(q2)
+
+   (148) zero5=N_D[2,2]
+-> (149) zero5 = -SIN(q2)*SIN(q4)*COS(q1) - COS(q4)*(SIN(q1)*SIN(q3)-COS(q1)*
+         COS(q2)*COS(q3))
+
+   (150) zero6=N_D[3,3]
+-> (151) zero6 = COS(q2)*COS(q4) - SIN(q2)*SIN(q4)*COS(q3)
+
+   (152) %-------------------------------------------------------------------- 
+   (153) Zeroconfig1=[d(zero1,q1), d(zero1,q2),d(zero1,q3), d(zero1,q4)]
+-> (154) Zeroconfig1[1,1] = Lax*SIN(q1) + Lb*SIN(q1) + Lt*(SIN(q1)*SIN(q3)*SIN(
+         q4)-COS(q1)*(SIN(q2)*COS(q4)+SIN(q4)*COS(q2)*COS(q3)))
+
+-> (155) Zeroconfig1[1,2] = -Lt*SIN(q1)*(COS(q2)*COS(q4)-SIN(q2)*SIN(q4)*COS(
+         q3))
+-> (156) Zeroconfig1[1,3] = -Lt*SIN(q4)*(COS(q1)*COS(q3)-SIN(q1)*SIN(q3)*COS(
+         q2))
+-> (157) Zeroconfig1[1,4] = -Lt*(SIN(q3)*COS(q1)*COS(q4)-SIN(q1)*(SIN(q2)*SIN(
+         q4)-COS(q2)*COS(q3)*COS(q4)))
+
+   (158) Zeroconfig2=[d(zero2,q1), d(zero2,q2),d(zero2,q3) ,d(zero2,q4)]
+-> (159) Zeroconfig2[1,1] = -Lax*COS(q1) - Lb*COS(q1) - Lt*(SIN(q3)*SIN(q4)*COS
+         (q1)+SIN(q1)*(SIN(q2)*COS(q4)+SIN(q4)*COS(q2)*COS(q3)))
+
+-> (160) Zeroconfig2[1,2] = Lt*COS(q1)*(COS(q2)*COS(q4)-SIN(q2)*SIN(q4)*COS(q3)
+         )
+-> (161) Zeroconfig2[1,3] = -Lt*SIN(q4)*(SIN(q1)*COS(q3)+SIN(q3)*COS(q1)*COS(
+         q2))
+-> (162) Zeroconfig2[1,4] = -Lt*(SIN(q1)*SIN(q3)*COS(q4)+COS(q1)*(SIN(q2)*SIN(
+         q4)-COS(q2)*COS(q3)*COS(q4)))
+
+   (163) Zeroconfig3=[d(zero3,q1),d(zero3,q2), d(zero3,q3),d(zero3,q4)]
+-> (164) Zeroconfig3[1,1] = 0
+-> (165) Zeroconfig3[1,2] = Lt*(SIN(q2)*COS(q4)+SIN(q4)*COS(q2)*COS(q3))
+-> (166) Zeroconfig3[1,3] = -Lt*SIN(q2)*SIN(q3)*SIN(q4)
+-> (167) Zeroconfig3[1,4] = Lt*(SIN(q4)*COS(q2)+SIN(q2)*COS(q3)*COS(q4))
+
+   (168) Zeroconfig4=[d(zero4,q1),d(zero4,q2), d(zero4,q3),d(zero4,q4)]
+-> (169) Zeroconfig4[1,1] = -SIN(q1)*COS(q3) - SIN(q3)*COS(q1)*COS(q2)
+-> (170) Zeroconfig4[1,2] = SIN(q1)*SIN(q2)*SIN(q3)
+-> (171) Zeroconfig4[1,3] = -SIN(q3)*COS(q1) - SIN(q1)*COS(q2)*COS(q3)
+-> (172) Zeroconfig4[1,4] = 0
+
+   (173) Zeroconfig5=[d(zero5,q1),d(zero5,q2), d(zero5,q3),d(zero5,q4)]
+-> (174) Zeroconfig5[1,1] = SIN(q1)*SIN(q2)*SIN(q4) - COS(q4)*(SIN(q3)*COS(q1)+
+         SIN(q1)*COS(q2)*COS(q3))
+-> (175) Zeroconfig5[1,2] = -COS(q1)*(SIN(q4)*COS(q2)+SIN(q2)*COS(q3)*COS(q4))
+-> (176) Zeroconfig5[1,3] = -COS(q4)*(SIN(q1)*COS(q3)+SIN(q3)*COS(q1)*COS(q2))
+-> (177) Zeroconfig5[1,4] = SIN(q4)*(SIN(q1)*SIN(q3)-COS(q1)*COS(q2)*COS(q3))
+          - SIN(q2)*COS(q1)*COS(q4)
+
+   (178) Zeroconfig6=[d(zero6,q1),d(zero6,q2), d(zero6,q3),d(zero6,q4)]
+-> (179) Zeroconfig6[1,1] = 0
+-> (180) Zeroconfig6[1,2] = -SIN(q2)*COS(q4) - SIN(q4)*COS(q2)*COS(q3)
+-> (181) Zeroconfig6[1,3] = SIN(q2)*SIN(q3)*SIN(q4)
+-> (182) Zeroconfig6[1,4] = -SIN(q4)*COS(q2) - SIN(q2)*COS(q3)*COS(q4)
+
+   (183) Zeroconfig=[Zeroconfig1;Zeroconfig2;Zeroconfig3;Zeroconfig4;Zeroconfig5;Zeroconfig6]
+-> (184) Zeroconfig[1,1] = Lax*SIN(q1) + Lb*SIN(q1) + Lt*(SIN(q1)*SIN(q3)*SIN(
+         q4)-COS(q1)*(SIN(q2)*COS(q4)+SIN(q4)*COS(q2)*COS(q3)))
+
+-> (185) Zeroconfig[1,2] = -Lt*SIN(q1)*(COS(q2)*COS(q4)-SIN(q2)*SIN(q4)*COS(q3)
+         )
+-> (186) Zeroconfig[1,3] = -Lt*SIN(q4)*(COS(q1)*COS(q3)-SIN(q1)*SIN(q3)*COS(q2)
+         )
+-> (187) Zeroconfig[1,4] = -Lt*(SIN(q3)*COS(q1)*COS(q4)-SIN(q1)*(SIN(q2)*SIN(
+         q4)-COS(q2)*COS(q3)*COS(q4)))
+-> (188) Zeroconfig[2,1] = -Lax*COS(q1) - Lb*COS(q1) - Lt*(SIN(q3)*SIN(q4)*COS(
+         q1)+SIN(q1)*(SIN(q2)*COS(q4)+SIN(q4)*COS(q2)*COS(q3)))
+
+-> (189) Zeroconfig[2,2] = Lt*COS(q1)*(COS(q2)*COS(q4)-SIN(q2)*SIN(q4)*COS(q3))
+-> (190) Zeroconfig[2,3] = -Lt*SIN(q4)*(SIN(q1)*COS(q3)+SIN(q3)*COS(q1)*COS(q2)
+         )
+-> (191) Zeroconfig[2,4] = -Lt*(SIN(q1)*SIN(q3)*COS(q4)+COS(q1)*(SIN(q2)*SIN(
+         q4)-COS(q2)*COS(q3)*COS(q4)))
+-> (192) Zeroconfig[3,1] = 0
+-> (193) Zeroconfig[3,2] = Lt*(SIN(q2)*COS(q4)+SIN(q4)*COS(q2)*COS(q3))
+-> (194) Zeroconfig[3,3] = -Lt*SIN(q2)*SIN(q3)*SIN(q4)
+-> (195) Zeroconfig[3,4] = Lt*(SIN(q4)*COS(q2)+SIN(q2)*COS(q3)*COS(q4))
+-> (196) Zeroconfig[4,1] = -SIN(q1)*COS(q3) - SIN(q3)*COS(q1)*COS(q2)
+-> (197) Zeroconfig[4,2] = SIN(q1)*SIN(q2)*SIN(q3)
+-> (198) Zeroconfig[4,3] = -SIN(q3)*COS(q1) - SIN(q1)*COS(q2)*COS(q3)
+-> (199) Zeroconfig[4,4] = 0
+-> (200) Zeroconfig[5,1] = SIN(q1)*SIN(q2)*SIN(q4) - COS(q4)*(SIN(q3)*COS(q1)+
+         SIN(q1)*COS(q2)*COS(q3))
+-> (201) Zeroconfig[5,2] = -COS(q1)*(SIN(q4)*COS(q2)+SIN(q2)*COS(q3)*COS(q4))
+-> (202) Zeroconfig[5,3] = -COS(q4)*(SIN(q1)*COS(q3)+SIN(q3)*COS(q1)*COS(q2))
+-> (203) Zeroconfig[5,4] = SIN(q4)*(SIN(q1)*SIN(q3)-COS(q1)*COS(q2)*COS(q3)) -
+         SIN(q2)*COS(q1)*COS(q4)
+-> (204) Zeroconfig[6,1] = 0
+-> (205) Zeroconfig[6,2] = -SIN(q2)*COS(q4) - SIN(q4)*COS(q2)*COS(q3)
+-> (206) Zeroconfig[6,3] = SIN(q2)*SIN(q3)*SIN(q4)
+-> (207) Zeroconfig[6,4] = -SIN(q4)*COS(q2) - SIN(q2)*COS(q3)*COS(q4)
+
+   (208) %-------------------------------------------------------------------- 
+   (209) % Equations of motion 
+   (210) %--------------------------------------------------------------------
+   (211) % Expressions for quantities to be output from CODE 
+   (212) x' = Dot(V_G_N>, n1>) 
+-> (213) x' = Lt*(SIN(q3)*COS(q1)*COS(q4)-SIN(q1)*(SIN(q2)*SIN(q4)-COS(q2)*COS(
+         q3)*COS(q4)))*(uD+COS(q3)*uB+SIN(q2)*SIN(q3)*uA) - Lax*SIN(q1)*uA - 
+         Lb*SIN(q1)*uA - Lt*(COS(q1)*COS(q3)-SIN(q1)*SIN(q3)*COS(q2))*(SIN(q3)*
+         COS(q4)*uB-SIN(q4)*uC-(SIN(q4)*COS(q2)+SIN(q2)*COS(q3)*COS(q4))*uA)
+
+   (214) y' = Dot(V_G_N>, n2>) 
+-> (215) y' = Lax*COS(q1)*uA + Lb*COS(q1)*uA + Lt*(SIN(q1)*SIN(q3)*COS(q4)+COS(
+         q1)*(SIN(q2)*SIN(q4)-COS(q2)*COS(q3)*COS(q4)))*(uD+COS(q3)*uB+SIN(q2)*
+         SIN(q3)*uA) - Lt*(SIN(q1)*COS(q3)+SIN(q3)*COS(q1)*COS(q2))*(SIN(q3)*
+         COS(q4)*uB-SIN(q4)*uC-(SIN(q4)*COS(q2)+SIN(q2)*COS(q3)*COS(q4))*uA)
+
+   (216) z' = Dot(V_G_N>, n3>) 
+-> (217) z' = Lt*(SIN(q2)*SIN(q3)*(SIN(q4)*uC-SIN(q3)*COS(q4)*uB)-(SIN(q4)*COS(
+         q2)+SIN(q2)*COS(q3)*COS(q4))*(uD+COS(q3)*uB))
+
+   (218) %--------------------------------------------------------------------
+   (219) % Units system for CODE input/output conversions 
+   (220) UnitSystem kg, meter, sec 
+   (221) %-------------------------------------------------------------------- 
+   (222) % Quantities to be output from CODE 
+   (223) Output t sec 
+   (224) Output x mm, y mm 
+   (225) Output x' mm/s, y' mm/s 
+   (226) Output uA rad/s, uB rad/s, uC rad/s, uD rad/s 
+   (227) Output uA' rad/s^2, uB' rad/s^2, uC' rad/s^2, uD' rad/s^2 
+   (228) %-------------------------------------------------------------------- 
+   (229) code ode() 4DOF_kane.m 
