@@ -1,4 +1,4 @@
-% Author: Elif İzgi
+% Author: 
 % Problem: Kane formulation for 4 DoF Manipulator
 %-------------------------------------------------------------------- 
 % Default settings 
